@@ -59,7 +59,7 @@ class ExtractedEvent(BaseModel):
 
 class ExtractedEvents(BaseModel):
     """Wrapper: one page contains many events."""
-
+    
     events: list[ExtractedEvent] = Field(
         default_factory=list,
         description="All upcoming events found on the page. Empty list if there are none.",
@@ -73,3 +73,18 @@ class Event(ExtractedEvent):
     source_url: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Status(Enum): 
+    PENDING="pending"
+    SCRAPE_FAILED="scrape_failed"
+    FORMAT_FAILED="format_failed"
+    FORMAT_VALIDATION_FAILED="format_validation_failed"
+    OK="ok"
+
+
+class FormatResult(BaseModel):
+    status: Status = Status.PENDING
+    raw_content: str | None = None
+    data: ExtractedEvents | None = None
+    error: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
