@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from enum import Enum
 
+
 class EventCategory(Enum):
     CLUB = "club"
     MUSIC = "music"
@@ -14,6 +15,7 @@ class EventCategory(Enum):
     WORKSHOP = "workshop"
     SPORTS = "sports"
     ETC = "etc"
+
 
 class ExtractedEvent(BaseModel):
     """Fields the LLM fills in from the page text."""
@@ -55,11 +57,15 @@ class ExtractedEvent(BaseModel):
         default=None,
         description="Short summary in 1-3 sentences. Include the lineup / artist names if listed.",
     )
+    url: str | None = Field(
+        default=None,
+        description="Event detail page's Url.",
+    )
 
 
 class ExtractedEvents(BaseModel):
     """Wrapper: one page contains many events."""
-    
+
     events: list[ExtractedEvent] = Field(
         default_factory=list,
         description="All upcoming events found on the page. Empty list if there are none.",
@@ -71,20 +77,23 @@ class Event(ExtractedEvent):
 
     id: str
     source_url: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc))
 
-class Status(Enum): 
-    PENDING="pending"
-    SCRAPE_FAILED="scrape_failed"
-    FORMAT_FAILED="format_failed"
-    FORMAT_VALIDATION_FAILED="format_validation_failed"
-    OK="ok"
+
+class Status(Enum):
+    PENDING = "pending"
+    SCRAPE_FAILED = "scrape_failed"
+    FORMAT_FAILED = "format_failed"
+    FORMAT_VALIDATION_FAILED = "format_validation_failed"
+    OK = "ok"
 
 
 class FormatResult(BaseModel):
     status: Status = Status.PENDING
+    source_url: str
     raw_content: str | None = None
     data: ExtractedEvents | None = None
     error: str | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc))
