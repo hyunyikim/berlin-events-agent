@@ -1,4 +1,4 @@
-import { agent } from "./agent.js";
+import { runAgent } from "./agent.js";
 import {
   debug,
   errorMessage,
@@ -13,7 +13,7 @@ import {
   const elapsed = timer();
 
   try {
-    const result = await agent(new Date().toISOString().slice(0, 10));
+    const result = await runAgent(new Date().toISOString().slice(0, 10));
     console.log("result", result);
     log("log_file", { path: getLogFile() });
   } catch (e) {
