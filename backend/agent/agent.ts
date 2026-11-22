@@ -7,6 +7,7 @@ import {
   ToolMessage,
 } from "langchain";
 import { ChatOpenRouter } from "@langchain/openrouter";
+import { CallbackHandler } from "@langfuse/langchain";
 
 import { webSearchTool, EventFormatSchema } from "./tools.js";
 import { EventList } from "./types.js";
@@ -22,6 +23,8 @@ const model = new ChatOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
   maxTokens: 16000,
 });
+
+const langfuseHandler = new CallbackHandler();
 
 function createLoggingMiddleware() {
   let turn = 0;
@@ -116,7 +119,7 @@ export async function runAgent(today: string): Promise<EventList> {
 
   const result = await eventsAgent.invoke(
     { messages: [{ role: "user", content: query }] },
-    { recursionLimit: 100 },
+    { recursionLimit: 100, callbacks: [langfuseHandler] },
   );
 
   const events = result.structuredResponse?.events;

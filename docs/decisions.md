@@ -22,3 +22,13 @@ Adding more features would make `agent.ts` harder to manage.
 
 - LangChain already has the pieces I built by hand, so I can focus on the agent's behavior instead of the loop.
 - I want to learn a framework that is used in real projects.
+
+## 2026-11-22: Add Langfuse for tracing
+
+**Context:** To check the agent's steps and results, I had to read through `.jsonl` log files by hand. This made it hard to review a run and see what to improve.
+
+**Decision:** Add Langfuse for tracing. Traffic is low for now, so I use Langfuse Cloud on the free plan.
+
+**Why:**
+
+- Langfuse is open source, so if traffic grows, I can self-host it on my own server.

@@ -1,3 +1,6 @@
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
 import { runAgent } from "./agent.js";
 import {
   debug,
@@ -9,6 +12,11 @@ import {
 } from "./logger.js";
 
 (async () => {
+  const sdk = new NodeSDK({
+    spanProcessors: [new LangfuseSpanProcessor()],
+  });
+  sdk.start();
+
   startRun();
   const elapsed = timer();
 
@@ -24,5 +32,7 @@ import {
     debug("run_failed_stack", e instanceof Error ? e.stack : String(e));
     log("log_file", { path: getLogFile() });
     process.exitCode = 1;
+  } finally {
+    await sdk.shutdown();
   }
 })();
