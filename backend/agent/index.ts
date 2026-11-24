@@ -10,6 +10,10 @@ import {
   startRun,
   timer,
 } from "./logger.js";
+import { saveRun } from "./runs.js";
+
+const ONE_DAY = 1000 * 60 * 60 * 24;
+const ONE_WEEK = ONE_DAY * 7;
 
 (async () => {
   const sdk = new NodeSDK({
@@ -17,12 +21,36 @@ import {
   });
   sdk.start();
 
-  startRun();
+  const runName = startRun();
   const elapsed = timer();
 
   try {
-    const result = await runAgent(new Date().toISOString().slice(0, 10));
+    const today = new Date();
+
+    // 7-day window from tomorrow, as YYYY-MM-DD in Berlin time
+    const from = new Date(today.getTime() + ONE_DAY).toLocaleDateString(
+      "en-CA",
+      { timeZone: "Europe/Berlin" },
+    );
+    const to = new Date(today.getTime() + ONE_WEEK).toLocaleDateString(
+      "en-CA",
+      { timeZone: "Europe/Berlin" },
+    );
+
+    const result = await runAgent({
+      from,
+      to,
+    });
     console.log("result", result);
+
+    const runFile = saveRun({
+      runName,
+      from,
+      to,
+      createdAt: new Date().toISOString(),
+      events: result,
+    });
+    log("run_saved", { path: runFile, events: result.length });
     log("log_file", { path: getLogFile() });
   } catch (e) {
     // The agent logs the details right before it throws; this line is the

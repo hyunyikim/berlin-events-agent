@@ -47,6 +47,10 @@ export const EventSchema = z
     description: z.string().meta({
       description: "Short summary of the event in one or two sentences.",
     }),
+    source: z.url().meta({
+      description:
+        "URL of the search result you read this event's facts (date, time, venue) from, copied exactly. If the facts came from several results, use the one that gave the date. Never invent a URL. This may be the same as link or different.",
+    }),
     link: z.url().meta({
       description:
         "URL of the event page, taken from the search results. Never invent a URL. Prefer the organizer's own page if it appears in the results; otherwise use the page where the event was found.",

@@ -17,7 +17,7 @@ export async function webSearch(query: string): Promise<string> {
       maxResults: 5,
       // chunksPerSource: 1,
       // searchDepth: "advanced",
-      includeRawContent: "markdown",
+      // includeRawContent: "markdown",
       includeDomains: ["visitberlin.de", "berlin.de"],
       includeDomainsMode: "prefer",
       // excludeDomains: ["eventbrite.com", "eventcartel.com", "ticketmaster.de"],

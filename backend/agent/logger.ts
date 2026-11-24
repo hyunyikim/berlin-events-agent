@@ -30,15 +30,20 @@ const MAX_CONSOLE_VALUE_LENGTH = 200;
 let runId = "no-run";
 let logFile: string | undefined;
 
-/** Call once at the start of a run. Creates the run id and the log file. */
+/**
+ * Call once at the start of a run. Creates the run id and the log file.
+ * Returns the run's name, e.g. "2026-11-16T12-01-03-a1b2c3". Other files
+ * (like runs/) use the same name, so a run's files are easy to match up.
+ */
 export function startRun(): string {
   runId = randomUUID().slice(0, 6);
+  // "2026-11-16T12:01:03.221Z" -> "2026-11-16T12-01-03" (":" is not nice in file names)
+  const stamp = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
+  const runName = `${stamp}-${runId}`;
 
   try {
     mkdirSync(LOG_DIR, { recursive: true });
-    // "2026-11-16T12:01:03.221Z" -> "2026-11-16T12-01-03" (":" is not nice in file names)
-    const stamp = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
-    logFile = `${LOG_DIR}${stamp}-${runId}.jsonl`;
+    logFile = `${LOG_DIR}${runName}.jsonl`;
   } catch (e) {
     // Logging must never crash the agent. Fall back to console-only.
     logFile = undefined;
@@ -48,7 +53,7 @@ export function startRun(): string {
     );
   }
 
-  return runId;
+  return runName;
 }
 
 /** Where this run's log file is (undefined before startRun() is called). */

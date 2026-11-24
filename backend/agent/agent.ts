@@ -15,7 +15,7 @@ import { debug, errorMessage, log, timer } from "./logger.js";
 import { buildSystemPrompt } from "./prompt.js";
 
 const MAX_TURNS = 10;
-const WEB_SEARCH_TOOL_CALL_LIMIT = 10;
+const WEB_SEARCH_TOOL_CALL_LIMIT = 3;
 const MODEL = "deepseek/deepseek-v4.1-flash-1017";
 
 const model = new ChatOpenRouter({
@@ -94,8 +94,14 @@ function createLoggingMiddleware() {
   return { middleware, stats: () => ({ turns: turn, totalTokens }) };
 }
 
-export async function runAgent(today: string): Promise<EventList> {
-  const query = "Berlin events this week.";
+export async function runAgent({
+  from,
+  to,
+}: {
+  from: string;
+  to: string;
+}): Promise<EventList> {
+  const query = `Berlin events happening from ${from} to ${to}.`;
   const runElapsed = timer();
   log("run_start", { query, model: MODEL, maxTurns: MAX_TURNS });
 
@@ -104,7 +110,7 @@ export async function runAgent(today: string): Promise<EventList> {
   const eventsAgent = createAgent({
     model,
     tools: [webSearchTool],
-    systemPrompt: buildSystemPrompt(today, WEB_SEARCH_TOOL_CALL_LIMIT),
+    systemPrompt: buildSystemPrompt(WEB_SEARCH_TOOL_CALL_LIMIT),
     responseFormat: toolStrategy(EventFormatSchema),
     middleware: [
       modelCallLimitMiddleware({ runLimit: MAX_TURNS, exitBehavior: "error" }),
@@ -119,7 +125,12 @@ export async function runAgent(today: string): Promise<EventList> {
 
   const result = await eventsAgent.invoke(
     { messages: [{ role: "user", content: query }] },
-    { recursionLimit: 100, callbacks: [langfuseHandler] },
+    {
+      recursionLimit: 100,
+      callbacks: [langfuseHandler],
+      runName: "berlin-events-agent",
+      tags: ["prompt-v1"],
+    },
   );
 
   const events = result.structuredResponse?.events;

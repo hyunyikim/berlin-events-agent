@@ -1,9 +1,5 @@
-export function buildSystemPrompt(
-  today: string,
-  webSearchToolCallLimit: number,
-): string {
+export function buildSystemPrompt(webSearchToolCallLimit: number): string {
   return `You are an assistant that finds interesting events in Berlin, Germany.
-Today is ${today}.
 
 Your job: find events for the date range in the user's question, then deliver them by calling the event_format tool.
 
